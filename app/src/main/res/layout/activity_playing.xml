@@ -1,13 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_playing_song">
+    android:background="@color/bg_playing_song"
+    tools:context=".ui.activities.PlayingSongActivity">
+
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp" />
+
+    <ImageView
+        android:id="@+id/btn_search"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:text="@string/now_playing"
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/now_playing"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/img_song_img"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
+        android:layout_width="226dp"
+        android:layout_height="226dp"
+        android:layout_below="@id/btn_back"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:adjustViewBounds="true" />
@@ -17,57 +45,98 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/img_song_img"
-        android:layout_alignLeft="@id/seek_bar"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
-        android:textColor="@color/song_name_artist"
-        android:textSize="@dimen/txt_song_name" />
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/txt_song_name"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/txt_singer_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/txt_song_name"
-        android:layout_alignLeft="@id/txt_song_name"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="4dp"
-        android:textColor="@color/song_name_artist"
+        android:textColor="@color/ln_tab"
         android:textSize="@dimen/txt_singer_name" />
 
     <SeekBar
         android:id="@+id/seek_bar"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
+        android:layout_height="24dp"
         android:layout_below="@id/txt_singer_name"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginRight="16dp" />
+        android:layout_marginRight="16dp"
+        android:max="1000"
+        android:progressBackgroundTint="@color/backgroundTint"
+        android:progressTint="@color/ln_tab"
+        android:thumb="@drawable/logo_panda_company_small" />
 
     <TextView
-        android:id="@+id/txt_song_duration"
+        android:id="@+id/txt_song_duration_minute"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seek_bar"
-        android:layout_alignRight="@id/seek_bar"
-        android:layout_marginTop="2dp"
-        android:layout_marginRight="16dp"
-        android:textColor="@color/song_duration"
+        android:layout_toLeftOf="@id/txt_hai_cham_1"
+        android:textColor="@color/ln_tab"
         android:textSize="@dimen/txt_song_duration" />
 
     <TextView
-        android:id="@+id/txt_current_duration"
+        android:id="@+id/txt_hai_cham_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seek_bar"
-        android:layout_marginTop="2dp"
-        android:layout_marginRight="4dp"
-        android:layout_toLeftOf="@id/txt_song_duration"
-        android:textColor="@color/song_name_artist"
+        android:layout_toLeftOf="@id/txt_song_duration_second"
+        android:text="@string/hai_cham"
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/txt_song_duration" />
+
+
+    <TextView
+        android:id="@+id/txt_song_duration_second"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seek_bar"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/txt_song_duration" />
+
+    <TextView
+        android:id="@+id/txt_current_duration_minute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seek_bar"
+        android:layout_marginLeft="16dp"
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/txt_song_duration" />
+
+    <TextView
+        android:id="@+id/txt_hai_cham_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seek_bar"
+        android:layout_toRightOf="@id/txt_current_duration_minute"
+        android:text="@string/hai_cham"
+        android:textColor="@color/ln_tab"
+        android:textSize="@dimen/txt_song_duration" />
+
+    <TextView
+        android:id="@+id/txt_current_duration_second"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seek_bar"
+        android:layout_toRightOf="@id/txt_hai_cham_2"
+        android:textColor="@color/ln_tab"
         android:textSize="@dimen/txt_song_duration" />
 
     <ImageView
         android:id="@+id/btn_play_pause"
-        android:layout_width="50dp"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txt_song_duration"
+        android:layout_below="@id/txt_song_duration_minute"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
         android:adjustViewBounds="true" />
@@ -76,10 +145,10 @@
         android:id="@+id/btn_next"
         android:layout_width="20dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txt_song_duration"
+        android:layout_below="@id/txt_song_duration_minute"
         android:layout_alignTop="@id/btn_play_pause"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="10dp"
         android:layout_toRightOf="@id/btn_play_pause"
         android:adjustViewBounds="true" />
 
@@ -87,10 +156,10 @@
         android:id="@+id/btn_pre"
         android:layout_width="20dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txt_song_duration"
+        android:layout_below="@id/txt_song_duration_minute"
         android:layout_alignTop="@id/btn_play_pause"
-        android:layout_marginTop="14dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="48dp"
         android:layout_toLeftOf="@id/btn_play_pause"
         android:adjustViewBounds="true" />
 
@@ -100,27 +169,54 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@id/seek_bar"
         android:layout_alignTop="@id/btn_next"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="8dp"
+        android:adjustViewBounds="true" />
+
+    <ImageView
+        android:id="@+id/btn_repeat"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/btn_next"
+        android:layout_alignRight="@id/seek_bar"
+        android:layout_marginRight="8dp"
         android:adjustViewBounds="true" />
 
     <ImageView
         android:id="@+id/img_volume"
         android:layout_width="18dp"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/btn_next"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="2dp"
+        android:layout_below="@id/btn_pre"
+        android:layout_marginTop="18dp"
         android:layout_toRightOf="@id/btn_next"
         android:adjustViewBounds="true" />
 
     <SeekBar
         android:id="@+id/seek_volume"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="24dp"
         android:layout_alignTop="@id/img_volume"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="16dp"
-        android:layout_toRightOf="@id/img_volume" />
+        android:layout_marginTop="-2dp"
+        android:layout_toLeftOf="@id/img_volume"
+        android:layout_toRightOf="@id/btn_muted"
+        android:max="1000"
+        android:progressBackgroundTint="@color/backgroundTint"
+        android:progressTint="@color/ln_tab"
+        android:thumb="@drawable/logo_panda_company_small" />
+
+    <ImageView
+        android:id="@+id/btn_muted"
+        android:layout_width="18dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/img_volume"
+        android:layout_toLeftOf="@id/btn_pre"
+        android:adjustViewBounds="true" />
+
+    <com.chibde.visualizer.BarVisualizer
+        android:id="@+id/visualizer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_volume"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="8dp" />
 
 </RelativeLayout>

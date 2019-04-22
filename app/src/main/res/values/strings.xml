@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PandaMusic</string>
+    <string name="now_playing">NOW PLAYING</string>
+    <string name="hai_cham">:</string>
 </resources>

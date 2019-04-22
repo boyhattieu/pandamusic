@@ -2,5 +2,7 @@
 <resources>
     <dimen name="txt_song_name">24sp</dimen>
     <dimen name="txt_singer_name">14sp</dimen>
-    <dimen name="txt_song_duration">10sp</dimen>
+    <dimen name="txt_song_duration">12sp</dimen>
+    <dimen name="frag_song_name">16sp</dimen>
+    <dimen name="now_playing">20sp</dimen>
 </resources>

@@ -5,9 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.MainActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rcv_main"
+    <com.pdc.pandamusic.adapter.viewpager.PandaViewPager
+        android:id="@+id/vpg_main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/ln_tab" />
+
+    <LinearLayout
+        android:id="@+id/ln_tab"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/ln_tab"
+        android:gravity="center"
+        android:orientation="horizontal" />
 
 </RelativeLayout>
