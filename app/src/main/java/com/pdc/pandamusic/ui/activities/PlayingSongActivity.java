@@ -18,10 +18,14 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.chibde.visualizer.BarVisualizer;
+import com.orhanobut.hawk.Hawk;
 import com.pdc.pandamusic.R;
 import com.pdc.pandamusic.constaint.Key;
+import com.pdc.pandamusic.ui.frags.SongListFrag;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Random;
 
 public class PlayingSongActivity extends AppCompatActivity {
 
@@ -29,6 +33,8 @@ public class PlayingSongActivity extends AppCompatActivity {
 
     private boolean isStart = true;
     private boolean isPlaying = false;
+    private boolean isShuffle = false;
+    private boolean isRepeat = false;
 
     private ImageView btnBack;
     private ImageView btnSearch;
@@ -60,9 +66,10 @@ public class PlayingSongActivity extends AppCompatActivity {
 
     private AudioManager audioManager;
     private int duration;
+    private int positionStart;
 
     private MediaPlayer mediaPlayer;
-
+    private Thread seekBarThread;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,14 +77,166 @@ public class PlayingSongActivity extends AppCompatActivity {
         setContentView(R.layout.activity_playing);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         initView();
-        playVideo();
+        playMusic(Key.TXT_SONG_PATH);
         configVisualizer();
 
-        duration = duration();
+        duration = duration(Key.TXT_SONG_PATH);
 
         processSeekBar();
         seekBarListener();
         volumeControls();
+        onListener();
+    }
+
+    private void onListener() {
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isPlaying = !isPlaying;
+                com.github.florent37.viewanimator.ViewAnimator.animate(btnPlay).scale(1f, 0.9f, 1f).duration(100).start();
+                int stopPosition = mediaPlayer.getCurrentPosition();
+                if (isPlaying) {
+                    mediaPlayer.pause();
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_play_brown).into(btnPlay);
+                    Hawk.put(Key.PLAY, "pause");
+                } else {
+                    mediaPlayer.seekTo(stopPosition);
+                    mediaPlayer.start();
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_pause_brown).into(btnPlay);
+                    Hawk.put(Key.PLAY, "play");
+                }
+            }
+        });
+
+        // TODO: 23/04/2019 config nút volume, muted, chuyển bài, repeat và random
+        btnShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShuffle = !isShuffle;
+                if (isShuffle) {
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_non_shuffle).into(btnShuffle);
+                    Hawk.put(Key.SHUFFLE, "nonShuffle");
+                } else {
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_shuffle).into(btnShuffle);
+                    Hawk.put(Key.SHUFFLE, "shuffle");
+                }
+
+                Log.d(TAG, "onClickShuffle: " + Hawk.get(Key.SHUFFLE).toString());
+            }
+        });
+
+        btnRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRepeat = !isRepeat;
+                if (isRepeat) {
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_repeat_onee).into(btnRepeat);
+                    Hawk.put(Key.REPEAT, "repeatOne");
+                } else {
+                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_repeat).into(btnRepeat);
+                    Hawk.put(Key.REPEAT, "repeatAll");
+                }
+
+                Log.d(TAG, "onClickShuffle: " + Hawk.get(Key.REPEAT).toString());
+            }
+        });
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Hawk.get(Key.SHUFFLE).toString().equals("shuffle")) {
+                    nextRandom();
+                    playRandomSong();
+                } else {
+                    nextNonRandom();
+                    playNextSong();
+                }
+            }
+        });
+
+        btnPre.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Hawk.get(Key.SHUFFLE).toString().equals("shuffle")) {
+                    nextRandom();
+                    playRandomSong();
+                } else {
+                    preNonRandom();
+                    playPreSong();
+                }
+            }
+        });
+    }
+
+    private void preNonRandom() {
+        int prePosition = SongListFrag.getInstance().getCurrentPosition() - 1;
+        SongListFrag.getInstance().setPreSongInfo(prePosition);
+    }
+
+    private void playPreSong() {
+        playOtherSong(Key.TXT_PRE_SONG_PATH,
+                Key.TXT_PRE_SONG_NAME,
+                Key.TXT_PRE_SINGER_NAME,
+                Key.TXT_PRE_SONG_DURATION);
+    }
+
+    private void nextRandom() {
+        int randomPosition = new Random().nextInt(SongListFrag.getInstance().loadMusic().size() - 1);
+        SongListFrag.getInstance().setRandomSongInfo(randomPosition);
+    }
+
+    private void playRandomSong() {
+        playOtherSong(Key.TXT_RANDOM_SONG_PATH,
+                Key.TXT_RANDOM_SONG_NAME,
+                Key.TXT_RANDOM_SINGER_NAME,
+                Key.TXT_RANDOM_SONG_DURATION);
+    }
+
+    private void playOtherSong(String songPath, String songName, String singerName, String songDuration) {
+        if (mediaPlayer != null){
+            mediaPlayer.reset();
+        }
+
+        txtSongName.setText(Hawk.get(songName).toString());
+        txtSingerName.setText(Hawk.get(singerName).toString());
+
+        if (Hawk.get(Key.PLAY).toString().equals("pause")) {
+            Glide.with(PlayingSongActivity.this).load(R.drawable.btn_pause_brown).into(btnPlay);
+            isPlaying = true;
+        }
+
+        duration = duration(songPath);
+        convertDuration(songDuration);
+
+
+        playMusic(songPath);
+        setupSeekBar();
+        visualizer.release();
+        configVisualizer();
+        processSeekBar();
+    }
+
+    private void setupSeekBar() {
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                durationSeekBar.setMax(1000);
+                processSeekBar();
+                mediaPlayer.start();
+            }
+        });
+    }
+
+    private void nextNonRandom() {
+        int nextPosition = SongListFrag.getInstance().getCurrentPosition() + 1;
+        SongListFrag.getInstance().setNextSongInfo(nextPosition);
+    }
+
+    private void playNextSong() {
+        playOtherSong(Key.TXT_NEXT_SONG_PATH,
+                Key.TXT_NEXT_SONG_NAME,
+                Key.TXT_NEXT_SINGER_NAME,
+                Key.TXT_NEXT_SONG_DURATION);
     }
 
     private void volumeControls() {
@@ -125,8 +284,8 @@ public class PlayingSongActivity extends AppCompatActivity {
         });
     }
 
-    private int duration() {
-        String path = getIntent().getStringExtra(Key.TXT_SONG_PATH);
+    private int duration(String songPath) {
+        String path = Hawk.get(songPath);
         MediaMetadataRetriever media = new MediaMetadataRetriever();
         media.setDataSource(path);
         String duration = media.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -135,10 +294,11 @@ public class PlayingSongActivity extends AppCompatActivity {
 
     private void processSeekBar() {
 
-        new Thread(new Runnable() {
+        seekBarThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
+
                 while (isStart) {
 
                     int currentDuration = mediaPlayer.getCurrentPosition();
@@ -185,11 +345,15 @@ public class PlayingSongActivity extends AppCompatActivity {
 
                 }
             }
-        }).start();
+        });
+
+        seekBarThread.start();
+
     }
 
-    private void playVideo() {
-        String path = getIntent().getStringExtra(Key.TXT_SONG_PATH);
+    private void playMusic(String songPath) {
+
+        String path = Hawk.get(songPath);
 
         Uri uri = Uri.fromFile(new File(path));
 
@@ -203,28 +367,25 @@ public class PlayingSongActivity extends AppCompatActivity {
 
                 // TODO: 13/04/2019 seekBar và currentTime khi kéo lại bị lỗi
 
-                // TODO: 13/04/2019  chuyển bài hát khác
+                nextSongAfterFinish();
 
-                isStart = false;
             }
         });
+    }
 
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isPlaying = !isPlaying;
-                com.github.florent37.viewanimator.ViewAnimator.animate(btnPlay).scale(1f, 0.9f, 1f).duration(100).start();
-                int stopPosition = mediaPlayer.getCurrentPosition();
-                if (isPlaying) {
-                    mediaPlayer.pause();
-                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_play_brown).into(btnPlay);
-                } else {
-                    mediaPlayer.seekTo(stopPosition);
-                    mediaPlayer.start();
-                    Glide.with(PlayingSongActivity.this).load(R.drawable.btn_pause_brown).into(btnPlay);
-                }
+    private void nextSongAfterFinish() {
+        if (Hawk.get(Key.REPEAT).toString().equals("repeatOne")){
+            playMusic(Key.TXT_SONG_PATH);
+        }
+        if (Hawk.get(Key.REPEAT).toString().equals("repeatAll")){
+            if (Hawk.get(Key.SHUFFLE).toString().equals("shuffle")){
+                nextRandom();
+                playRandomSong();
+            } else {
+                nextNonRandom();
+                playNextSong();
             }
-        });
+        }
     }
 
     private void initView() {
@@ -256,11 +417,22 @@ public class PlayingSongActivity extends AppCompatActivity {
         Glide.with(this).load(R.drawable.btn_pause_brown).into(btnPlay);
         Glide.with(this).load(R.drawable.btn_next).into(btnNext);
         Glide.with(this).load(R.drawable.btn_pre).into(btnPre);
-        Glide.with(this).load(R.drawable.btn_shuffle).into(btnShuffle);
+
+        if (Hawk.get(Key.SHUFFLE).toString().equals("shuffle")) {
+            Glide.with(this).load(R.drawable.btn_shuffle).into(btnShuffle);
+        } else {
+            Glide.with(this).load(R.drawable.btn_non_shuffle).into(btnShuffle);
+        }
+
         Glide.with(this).load(R.drawable.img_muted).into(btnMuted);
         Glide.with(this).load(R.drawable.ic_back).into(btnBack);
         Glide.with(this).load(R.drawable.ic_search).into(btnSearch);
-        Glide.with(this).load(R.drawable.btn_repeat).into(btnRepeat);
+
+        if (Hawk.get(Key.SHUFFLE).toString().equals("repeatAll")) {
+            Glide.with(this).load(R.drawable.btn_repeat).into(btnRepeat);
+        } else {
+            Glide.with(this).load(R.drawable.btn_repeat_onee).into(btnRepeat);
+        }
 
         btnNext.setColorFilter(Color.parseColor("#754123"));
         btnPre.setColorFilter(Color.parseColor("#754123"));
@@ -271,23 +443,21 @@ public class PlayingSongActivity extends AppCompatActivity {
         btnRepeat.setColorFilter(Color.parseColor("#754123"));
         btnMuted.setColorFilter(Color.parseColor("#754123"));
 
-        txtSongName.setText(getIntent().getStringExtra(Key.TXT_SONG_NAME));
-        txtSingerName.setText(getIntent().getStringExtra(Key.TXT_SINGER_NAME));
+        txtSongName.setText(Hawk.get(Key.TXT_SONG_NAME).toString());
+        txtSingerName.setText(Hawk.get(Key.TXT_SINGER_NAME).toString());
 
-        convertDuration();
-//        currentDuration();
+        convertDuration(Key.TXT_SONG_DURATION);
     }
 
     private void configVisualizer() {
         visualizer.setColor(Color.parseColor("#754123"));
         visualizer.setDensity(110);
         visualizer.setPlayer(mediaPlayer.getAudioSessionId());
-        Log.d(TAG, "configVisualizer: " + mediaPlayer.getAudioSessionId());
     }
 
     @SuppressLint("SetTextI18n")
-    private void convertDuration() {
-        int songDuration = getIntent().getIntExtra(Key.TXT_SONG_DURATION, 0);
+    private void convertDuration(String duration) {
+        int songDuration = Hawk.get(duration, 0);
         long second = songDuration / 1000;
         long minute = second / 60;
         second = second % 60;

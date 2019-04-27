@@ -41,4 +41,7 @@ dependencies {
 
     //Circle ImageView
     implementation 'de.hdodenhof:circleimageview:3.0.0'
+
+    //Hawk
+    implementation 'com.orhanobut:hawk:2.0.1'
 }
